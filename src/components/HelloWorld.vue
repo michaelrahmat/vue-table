@@ -1,58 +1,174 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <div id="app">
+         <!-- Letakkan TEMPLATE disini -->
+         <div class="container">
+            <div>
+                  <b-table
+                     id="my-table"
+                     :items="items"
+                     :fields="fields"
+                     :per-page="perPage"
+                     :current-page="currentPage"
+                     striped 
+                     hover
+                  >
+                     <template v-slot:cell(actions)="row">
+                     <b-button size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1 btn btn-warning">
+                        Edit
+                     </b-button>
+                     <b-button size="sm" @click="del(row.item, row.index, $event.target)" class="mr-1 btn btn-danger">
+                        Del
+                     </b-button>
+                     </template>
+                  </b-table>
+                  <b-pagination
+                     v-model="currentPage"
+                     :total-rows="rows"
+                     :per-page="perPage"
+                     aria-controls="my-table"
+                  ></b-pagination>
+
+                  <p class="mt-3">Current Page: {{ currentPage }}</p>
+                  <b-form @submit="onSubmit" @reset="onReset" v-if="show">
+                     <b-form-group
+                     id="input-group-1"
+                     label="Id:"
+                     label-for="input-1"
+                     >
+                     <b-form-input
+                        id="input-1"
+                        v-model="form.id"
+                        type="text"
+                        required
+                        placeholder=""
+                     ></b-form-input>
+                     </b-form-group>
+
+                     <b-form-group
+                     id="input-group-2"
+                     label="First Name:"
+                     label-for="input-2"
+                     >
+                     <b-form-input
+                        id="input-2"
+                        v-model="form.first_name"
+                        type="text"
+                        required
+                        placeholder=""
+                     ></b-form-input>
+                     </b-form-group>
+
+                     <b-form-group
+                     id="input-group-3"
+                     label="Last Name:"
+                     label-for="input-3"
+                     >
+                     <b-form-input
+                        id="input-3"
+                        v-model="form.last_name"
+                        type="text"
+                        required
+                        placeholder=""
+                     ></b-form-input>
+                     </b-form-group>
+
+                     <b-button type="submit" variant="primary">{{ form_action }}</b-button>
+                     <b-button type="reset" variant="danger">Reset</b-button>
+                  </b-form>
+             </div>
+         </div>
+      </div>
 </template>
 
 <script>
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
-  }
+  data() {
+      return {
+        perPage: 3,
+        currentPage: 1,
+        fields: [
+          {key: 'id', sortable: true },
+          'first_name',
+          'last_name',
+          { key: 'actions', label: 'Actions'}
+        ],
+        items: [
+          { id: 1, first_name: 'Dickerson', last_name: 'Macdonald' },
+          { id: 2, first_name: 'Larsen', last_name: 'Shaw' },
+          { id: 3, first_name: 'Geneva', last_name: 'Wilson' },
+          { id: 4, first_name: 'Jami', last_name: 'Carney' }
+        ],
+        form: {
+          id: '',
+          first_name: '',
+          last_name: '',
+        },
+        show: true,
+        form_action : 'Insert',
+        form_index : 0,
+      }
+    },
+    computed: {
+      rows() {
+        return this.items.length
+      }
+    },
+    methods: {
+      info(item) {
+        alert(JSON.stringify(item, null, 2))
+        //this.infoModal.title = `Row index: ${index}`
+        //this.infoModal.content = JSON.stringify(item, null, 2)
+        //this.$root.$emit('bv::show::modal', this.infoModal.id, button)
+      },
+      edit(item, index) {
+        alert(JSON.stringify(item, null, 2))
+        this.form.id = item.id
+        this.form.first_name = item.first_name
+        this.form.last_name = item.last_name
+        this.form_action = 'Update'
+        this.form_index = index + ((this.currentPage - 1) * this.perPage)
+        //this.infoModal.title = `Row index: ${index}`
+        //this.infoModal.content = JSON.stringify(item, null, 2)
+        //this.$root.$emit('bv::show::modal', this.infoModal.id, button)
+      },
+      del(item, index) {
+        alert(JSON.stringify(item, null, 2))
+        this.items.splice(index + ((this.currentPage - 1) * this.perPage), 1)
+      },
+      onSubmit(evt) {
+        evt.preventDefault()
+        alert(JSON.stringify(this.form))
+        if (this.form_action == 'Update'){
+          this.items[this.form_index].id = this.form.id
+          this.items[this.form_index].first_name = this.form.first_name
+          this.items[this.form_index].last_name = this.form.last_name
+        } else { //Insert
+          this.items.push({ id: this.form.id, first_name: this.form.first_name, last_name: this.form.last_name })
+        }
+        this.form.id = ''
+        this.form.first_name = ''
+        this.form.last_name = ''
+        this.form_action = 'Insert'
+      },
+      onReset(evt) {
+        evt.preventDefault()
+        // Reset our form values
+        this.form.id = ''
+        this.form.first_name = ''
+        this.form.last_name = ''
+        this.form_action = 'Insert'
+        // Trick to reset/clear native browser form validation state
+        this.show = false
+        this.$nextTick(() => {
+          this.show = true
+        })
+      }
+    }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+
 </style>
